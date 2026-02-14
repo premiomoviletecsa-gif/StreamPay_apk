@@ -52,8 +52,9 @@ export interface Video {
   parent_category?: string;
   collection?: string;
   duration: number;
-  thumbnailUrl: string;
-  videoUrl: string;
+  thumbnailUrl?: string;
+  thumbnail?: string;  // Alias used by some API responses
+  videoUrl?: string;
   creatorId: string;
   creatorName: string;
   creatorRole?: string;
