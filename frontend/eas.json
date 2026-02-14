@@ -15,30 +15,15 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      },
-      "ios": {
-        "simulator": true
       }
     },
     "production": {
       "android": {
         "buildType": "apk"
-      },
-      "ios": {
-        "resourceClass": "m-medium"
       }
     }
   },
   "submit": {
-    "production": {
-      "android": {
-        "serviceAccountKeyPath": "./google-services.json",
-        "track": "production"
-      },
-      "ios": {
-        "appleId": "",
-        "ascAppId": ""
-      }
-    }
+    "production": {}
   }
-}
+  }
