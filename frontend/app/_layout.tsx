@@ -1,35 +1,33 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useServerStore } from '../src/store/serverStore';
 import { useAuthStore } from '../src/store/authStore';
 import { useCartStore } from '../src/store/cartStore';
-import LoadingScreen from '../src/components/LoadingScreen';
 
 export default function RootLayout() {
-  const { loadConfig, isLoading: serverLoading } = useServerStore();
-  const { checkAuth, isLoading: authLoading } = useAuthStore();
+  const { loadConfig } = useServerStore();
+  const { checkAuth } = useAuthStore();
   const { loadCart } = useCartStore();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const initialize = async () => {
-      await loadConfig();
-      await checkAuth();
-      await loadCart();
+      try {
+        await loadConfig();
+        await checkAuth();
+        await loadCart();
+      } catch (error) {
+        console.error('Error during initialization:', error);
+      } finally {
+        setIsInitialized(true);
+      }
     };
     initialize();
   }, []);
 
-  if (serverLoading) {
-    return (
-      <SafeAreaProvider>
-        <StatusBar style="light" />
-        <LoadingScreen message="Cargando..." />
-      </SafeAreaProvider>
-    );
-  }
-
+  // No bloquear la navegación, dejar que index.tsx maneje la redirección
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
@@ -40,6 +38,7 @@ export default function RootLayout() {
           animation: 'slide_from_right',
         }}
       >
+        <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="auth" options={{ headerShown: false }} />
         <Stack.Screen name="setup" options={{ headerShown: false }} />
