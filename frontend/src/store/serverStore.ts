@@ -57,23 +57,39 @@ export const useServerStore = create<ServerState>((set, get) => ({
   loadConfig: async () => {
     set({ isLoading: true });
     try {
-      const [serverUrl, isConfigured] = await Promise.all([
-        api.getServerUrl(),
-        AsyncStorage.getItem(SERVER_CONFIGURED_KEY),
-      ]);
+      let serverUrl = 'http://192.168.43.101';
+      let isConfiguredStr: string | null = null;
+      
+      try {
+        const [url, configured] = await Promise.all([
+          api.getServerUrl(),
+          AsyncStorage.getItem(SERVER_CONFIGURED_KEY),
+        ]);
+        serverUrl = url;
+        isConfiguredStr = configured;
+      } catch (storageError) {
+        console.error('Error loading from storage:', storageError);
+      }
+      
+      const isConfigured = isConfiguredStr === 'true';
       
       set({ 
         serverUrl, 
-        isConfigured: isConfigured === 'true',
+        isConfigured,
         isLoading: false 
       });
 
-      if (isConfigured === 'true') {
-        const isConnected = await api.testConnection();
-        set({ isConnected });
+      // Solo intentar conexión si ya está configurado, en segundo plano
+      if (isConfigured) {
+        api.testConnection().then(isConnected => {
+          set({ isConnected });
+        }).catch(() => {
+          set({ isConnected: false });
+        });
       }
     } catch (error) {
-      set({ isLoading: false });
+      console.error('Error in loadConfig:', error);
+      set({ isLoading: false, isConfigured: false });
     }
   },
 
